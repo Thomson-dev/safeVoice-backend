@@ -25,53 +25,53 @@ firebaseService.initializeFirebase();
 // Middleware
 app.use(express.json());
 
+// Health check
+app.get('/api/health', (req: Request, res: Response) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// Home route
+app.get('/', (req: Request, res: Response) => {
+  res.json({ 
+    message: 'SafeVoice Backend API',
+    version: '1.0.0',
+    endpoints: {
+      auth: '/api/auth',
+      public: '/api',
+      student: '/api/student',
+      cases: '/api/cases',
+      counselor: '/api/counselor',
+      alerts: '/api/alerts',
+      devices: '/api/devices'
+    }
+  });
+});
+
+// Mount routes
+app.use('/api/auth', authRoutes);
+app.use('/api', publicRoutes);
+app.use('/api/student', studentRoutes);
+app.use('/api/counselor', counselorRoutes);
+app.use('/api/cases', caseRoutes);
+app.use('/api/alerts', emergencyAlertRoutes);
+app.use('/api/devices', deviceTokenRoutes);
+app.use('/api/alerts', emergencyAlertRoutes);
+app.use('/api', resourceRoutes);
+
+// 404 handler
+app.use((req: Request, res: Response) => {
+  res.status(404).json({
+    error: 'Endpoint not found'
+  });
+});
+
+// Error handling
+app.use(errorHandler);
+
 // Connect to MongoDB and start server
 const startServer = async () => {
   try {
     await connectDB();
-
-    // Health check
-    app.get('/api/health', (req: Request, res: Response) => {
-      res.json({ status: 'OK', timestamp: new Date().toISOString() });
-    });
-
-    // Home route
-    app.get('/', (req: Request, res: Response) => {
-      res.json({ 
-        message: 'SafeVoice Backend API',
-        version: '1.0.0',
-        endpoints: {
-          auth: '/api/auth',
-          public: '/api',
-          student: '/api/student',
-          cases: '/api/cases',
-          counselor: '/api/counselor',
-          alerts: '/api/alerts',
-          devices: '/api/devices'
-        }
-      });
-    });
-
-    // Mount routes
-    app.use('/api/auth', authRoutes);
-    app.use('/api', publicRoutes);
-    app.use('/api/student', studentRoutes);
-    app.use('/api/counselor', counselorRoutes);
-    app.use('/api/cases', caseRoutes);
-    app.use('/api/alerts', emergencyAlertRoutes);
-    app.use('/api/devices', deviceTokenRoutes);
-    app.use('/api/alerts', emergencyAlertRoutes);
-    app.use('/api', resourceRoutes);
-
-    // 404 handler
-    app.use((req: Request, res: Response) => {
-      res.status(404).json({
-        error: 'Endpoint not found'
-      });
-    });
-
-    // Error handling
-    app.use(errorHandler);
 
     // Start listening
     app.listen(PORT, () => {
@@ -112,6 +112,9 @@ const startServer = async () => {
 // Start server only if not in serverless environment
 if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
   startServer();
+} else {
+  // Connect to MongoDB for serverless (Vercel)
+  connectDB().catch(err => console.error('MongoDB connection error:', err));
 }
 
 // Export for Vercel serverless
