@@ -1,0 +1,997 @@
+{
+	"info": {
+		"_postman_id": "safevoice-api-collection",
+		"name": "SafeVoice Backend API",
+		"description": "Complete API collection for SafeVoice Backend - Test all endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Health & Info",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/health",
+							"host": ["{{base_url}}"],
+							"path": ["api", "health"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "API Info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": ["{{base_url}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Authentication - Student",
+			"item": [
+				{
+					"name": "Register Student",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"student_token\", jsonData.token);",
+									"    pm.environment.set(\"student_id\", jsonData.userId);",
+									"    pm.environment.set(\"anonymous_id\", jsonData.anonymousId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"student@school.edu\",\n  \"password\": \"SecurePass123!\",\n  \"role\": \"student\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register/student",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register", "student"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Student",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"student_token\", jsonData.token);",
+									"    pm.environment.set(\"student_id\", jsonData.userId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"student@school.edu\",\n  \"password\": \"SecurePass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login/student",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login", "student"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Authentication - Counselor",
+			"item": [
+				{
+					"name": "Register Counselor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"counselor_token\", jsonData.token);",
+									"    pm.environment.set(\"counselor_id\", jsonData.userId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"counselor@school.edu\",\n  \"password\": \"SecurePass123!\",\n  \"fullName\": \"Dr. Sarah Johnson\",\n  \"role\": \"counselor\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register/counselor",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register", "counselor"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Counselor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"counselor_token\", jsonData.token);",
+									"    pm.environment.set(\"counselor_id\", jsonData.userId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"counselor@school.edu\",\n  \"password\": \"SecurePass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login/counselor",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login", "counselor"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Reports",
+			"item": [
+				{
+					"name": "Submit Report",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"report_id\", jsonData.reportId);",
+									"    pm.environment.set(\"tracking_code\", jsonData.trackingCode);",
+									"    pm.environment.set(\"case_id\", jsonData.caseId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{student_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"incidentType\": \"Bullying\",\n  \"description\": \"Three students have been excluding me from group activities and making fun of me in the hallway. This has been happening for 2 weeks.\",\n  \"evidenceUrl\": \"\",\n  \"schoolName\": \"Lincoln High School\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reports",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reports"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Report Status (Public)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/reports/{{tracking_code}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reports", "{{tracking_code}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Reports",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{student_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/my-reports",
+							"host": ["{{base_url}}"],
+							"path": ["api", "my-reports"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Report Details",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{student_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/reports/{{report_id}}/details",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reports", "{{report_id}}", "details"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Trusted Contacts",
+			"item": [
+				{
+					"name": "Add Trusted Contact",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"contact_id\", jsonData.contact.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{student_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Mom\",\n  \"phone\": \"+1 (555) 123-4567\",\n  \"email\": \"mom@email.com\",\n  \"relationship\": \"Parent\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/student/contacts",
+							"host": ["{{base_url}}"],
+							"path": ["api", "student", "contacts"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Contacts",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{student_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/student/contacts",
+							"host": ["{{base_url}}"],
+							"path": ["api", "student", "contacts"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Contact",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{student_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Mom\",\n  \"phone\": \"+1 (555) 999-8888\",\n  \"email\": \"mom.updated@email.com\",\n  \"relationship\": \"Parent\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/student/contacts/{{contact_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "student", "contacts", "{{contact_id}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Contact",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{student_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/student/contacts/{{contact_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "student", "contacts", "{{contact_id}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Messages",
+			"item": [
+				{
+					"name": "Send Message (Student)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"message_id\", jsonData.message.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{student_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reportId\": \"{{report_id}}\",\n  \"content\": \"Hi, I would like to discuss my case. Can we schedule a meeting tomorrow at 2pm?\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/student/messages",
+							"host": ["{{base_url}}"],
+							"path": ["api", "student", "messages"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Message Thread",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{student_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/student/reports/{{report_id}}/messages",
+							"host": ["{{base_url}}"],
+							"path": ["api", "student", "reports", "{{report_id}}", "messages"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Unread Messages",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{student_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/student/messages/unread",
+							"host": ["{{base_url}}"],
+							"path": ["api", "student", "messages", "unread"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Message as Read",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{student_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/student/messages/{{message_id}}/read",
+							"host": ["{{base_url}}"],
+							"path": ["api", "student", "messages", "{{message_id}}", "read"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "7. Cases (Counselor)",
+			"item": [
+				{
+					"name": "Get My Cases",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{counselor_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/cases/my-cases",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cases", "my-cases"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Available Cases",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{counselor_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/cases/available",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cases", "available"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Claim Case",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{counselor_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/cases/{{case_id}}/claim",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cases", "{{case_id}}", "claim"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Case Details",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{counselor_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/cases/{{case_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cases", "{{case_id}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Case Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{counselor_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/cases/{{case_id}}/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cases", "{{case_id}}", "status"]
+						},
+						"description": "Valid status values: 'new', 'active', 'escalated', 'closed'"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Risk Level",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{counselor_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"riskLevel\": \"high\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/cases/{{case_id}}/risk-level",
+							"host": ["{{base_url}}"],
+							"path": ["api", "cases", "{{case_id}}", "risk-level"]
+						},
+						"description": "Valid risk levels: 'low', 'medium', 'high', 'critical'"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "8. Emergency Alerts",
+			"item": [
+				{
+					"name": "Trigger SOS Alert",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"alert_id\", jsonData.alert.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{student_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reportId\": \"{{report_id}}\",\n  \"location\": {\n    \"latitude\": 40.7128,\n    \"longitude\": -74.0060\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/alerts/sos",
+							"host": ["{{base_url}}"],
+							"path": ["api", "alerts", "sos"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Trigger Crisis Alert",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{student_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reportId\": \"{{report_id}}\",\n  \"description\": \"Experiencing severe anxiety and panic attacks. Need immediate help.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/alerts/crisis",
+							"host": ["{{base_url}}"],
+							"path": ["api", "alerts", "crisis"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Alert Details",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{student_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/alerts/{{alert_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "alerts", "{{alert_id}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Alerts for Case",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{student_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/alerts/case/{{case_id}}/active",
+							"host": ["{{base_url}}"],
+							"path": ["api", "alerts", "case", "{{case_id}}", "active"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "9. Device Tokens",
+			"item": [
+				{
+					"name": "Register Device Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"device_token_id\", jsonData.deviceToken.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{student_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"deviceToken\": \"firebase_fcm_token_example_12345\",\n  \"deviceType\": \"android\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/devices/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "devices", "register"]
+						},
+						"description": "Device types: 'ios', 'android', 'web'"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Devices",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{student_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/devices/my-devices",
+							"host": ["{{base_url}}"],
+							"path": ["api", "devices", "my-devices"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Device Token",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{student_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/devices/{{device_token_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "devices", "{{device_token_id}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "10. Resources",
+			"item": [
+				{
+					"name": "Get All Resources",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/resources",
+							"host": ["{{base_url}}"],
+							"path": ["api", "resources"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Resource Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/resources/{{resource_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "resources", "{{resource_id}}"]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3001",
+			"type": "string"
+		}
+	]
+}
