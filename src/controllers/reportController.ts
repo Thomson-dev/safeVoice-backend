@@ -47,30 +47,6 @@ export const reportController = {
       // Link case to report
       await reportModel.linkCase(report.id, caseDoc.id);
 
-      // Auto-assign case to least-loaded counselor
-      try {
-        const activeCounselors = await counselorModel.getActive();
-        
-        if (activeCounselors && activeCounselors.length > 0) {
-          // Transform to the format expected by autoAssignToCounselor
-          const counselorsForAssignment = activeCounselors.map(c => ({
-            id: c.id,
-            name: c.fullName
-          }));
-          
-          const assignedCase = await caseModel.autoAssignToCounselor(caseDoc.id, counselorsForAssignment);
-          
-          if (assignedCase) {
-            console.log(`✅ Case ${caseDoc.caseId} auto-assigned to counselor`);
-          }
-        } else {
-          console.warn('⚠️ No active counselors available for auto-assignment');
-        }
-      } catch (assignError) {
-        console.error('Auto-assignment error:', assignError);
-        // Don't fail the report creation if auto-assignment fails
-      }
-
       return res.status(201).json({
         success: true,
         message: 'Report submitted successfully',

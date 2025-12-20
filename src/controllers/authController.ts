@@ -4,7 +4,7 @@ import { studentModel } from '../models/studentDb';
 import { counselorModel } from '../models/counselorDb';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-const JWT_EXPIRE = '24h';
+const JWT_EXPIRE = '2d';
 
 // Generate JWT token
 const generateToken = (userId: string, anonymousId: string | undefined, role: string): string => {
