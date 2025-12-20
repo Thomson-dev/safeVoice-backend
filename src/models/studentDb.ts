@@ -1,12 +1,10 @@
 import mongoose from 'mongoose';
 import { StudentSchema } from './schemas/StudentSchema';
 import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
 
 
 const Student = mongoose.model('Student', StudentSchema);
-
-// Counter for generating anonymousIds
-let anonIdCounter = 1;
 
 export const studentModel = {
   register: async (email: string, password: string) => {
@@ -19,9 +17,8 @@ export const studentModel = {
         }
       }
 
-      // Generate anonymousId
-      const anonymousId = `ANON-${String(anonIdCounter).padStart(5, '0')}`;
-      anonIdCounter++;
+      // Generate unique anonymousId using UUID
+      const anonymousId = `ANON-${uuidv4().split('-')[0]}`;
 
       // Hash password
       const salt = await bcrypt.genSalt(10);
