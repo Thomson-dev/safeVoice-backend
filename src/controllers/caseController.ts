@@ -167,7 +167,8 @@ export const caseController = {
           incidentType: report.incidentType,
           description: report.description,
           status: report.status,
-          createdAt: report.createdAt
+          createdAt: report.createdAt,
+          evidenceUrl: report.evidenceUrl || null
         },
         messageCount: messages.length,
         lastMessage: messages.length > 0 ? messages[messages.length - 1] : null
