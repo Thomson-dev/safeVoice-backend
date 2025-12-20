@@ -156,12 +156,16 @@ export const caseModel = {
 
   assignCounselor: async (id: string, counselorId: string) => {
     try {
+      console.log('Assigning counselor:', { id, counselorId });
       const caseDoc = await Case.findByIdAndUpdate(
         id,
         { counselorId, status: 'active', assignedAt: new Date() },
         { new: true }
       );
-      if (!caseDoc) return null;
+      if (!caseDoc) {
+        console.error('Case not found during assignment:', id);
+        return null;
+      }
       return {
         id: caseDoc._id.toString(),
         caseId: caseDoc.caseId,
