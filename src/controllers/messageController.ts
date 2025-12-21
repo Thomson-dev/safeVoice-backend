@@ -70,7 +70,7 @@ export const messageController = {
             'Student',
             content,
             caseDoc.caseId
-          ).catch(err => console.error('Failed to send push notification:', err));
+          ).catch((err: any) => console.error('Failed to send push notification:', err));
         }
 
         console.log(`📨 Notification sent to counselor ${caseDoc.counselorId}: New message in case ${caseDoc.caseId}`);
@@ -159,7 +159,7 @@ export const messageController = {
           'Counselor',
           content,
           caseDoc.caseId
-        ).catch(err => console.error('Failed to send push notification:', err));
+        ).catch((err: any) => console.error('Failed to send push notification:', err));
       }
 
       console.log(`📨 Notification sent to student ${report.userId}: Reply from counselor in case ${caseDoc.caseId}`);

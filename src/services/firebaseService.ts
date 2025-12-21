@@ -1,140 +1,107 @@
 import * as admin from 'firebase-admin';
 import path from 'path';
 
-/**
- * Firebase Push Notification Service
- * 
- * Handles all push notification delivery via Firebase Cloud Messaging (FCM)
- * Used for:
- * - Message notifications (counselor replied, new message)
- * - Emergency alerts (SOS, escalation)
- * - Case updates (assigned, status change)
- * - General notifications
- */
-
 class FirebaseService {
   private initialized = false;
 
-  /**
-   * Initialize Firebase Admin SDK
-   * Call this once during app startup
-   * 
-   * Credentials priority:
-   * 1. FIREBASE_CREDENTIALS environment variable (path to JSON file)
-   * 2. GOOGLE_APPLICATION_CREDENTIALS environment variable (system-wide)
-   * 3. Default service account (if running on Google Cloud)
-   */
+  constructor() {
+    this.initializeFirebase();
+  }
+
   initializeFirebase() {
+    if (admin.apps.length > 0) {
+      this.initialized = true;
+      console.log('[Firebase] ✅ Already initialized (reusing existing app)');
+      return;
+    }
+
     if (this.initialized) {
-      console.log('[Firebase] Already initialized');
       return;
     }
 
     try {
       let options: admin.ServiceAccount | undefined;
 
-      // Method 1: Check for FIREBASE_CREDENTIALS env var (path to JSON file)
-      const credentialsPath = process.env.FIREBASE_CREDENTIALS;
-      if (credentialsPath) {
-        const resolvedPath = path.resolve(credentialsPath);
-        console.log(`[Firebase] Loading credentials from: ${resolvedPath}`);
-        // ServiceAccount will be loaded from path
-        options = require(resolvedPath);
+      // Priority: JSON env > BASE64 env > file path
+      if (process.env.FIREBASE_CREDENTIALS_JSON) {
+        try {
+          options = JSON.parse(process.env.FIREBASE_CREDENTIALS_JSON);
+          console.log('[Firebase] Loading credentials from FIREBASE_CREDENTIALS_JSON env');
+        } catch (error) {
+          console.error('[Firebase] Invalid JSON in FIREBASE_CREDENTIALS_JSON:', error);
+        }
+      } else if (process.env.FIREBASE_CREDENTIALS_BASE64) {
+        try {
+          const decoded = Buffer.from(process.env.FIREBASE_CREDENTIALS_BASE64, 'base64').toString('utf8');
+          options = JSON.parse(decoded);
+          console.log('[Firebase] Loading credentials from FIREBASE_CREDENTIALS_BASE64 env');
+        } catch (error) {
+          console.error('[Firebase] Invalid base64 or JSON in FIREBASE_CREDENTIALS_BASE64:', error);
+        }
+      } else if (process.env.FIREBASE_CREDENTIALS) {
+        const resolvedPath = path.resolve(process.env.FIREBASE_CREDENTIALS);
+        console.log(`[Firebase] Loading credentials from file: ${resolvedPath}`);
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          options = require(resolvedPath);
+        } catch (error) {
+          console.error('[Firebase] Failed to load credentials from file:', error);
+        }
       }
 
-      // Initialize Firebase Admin
-      admin.initializeApp({
-        credential: options
-          ? admin.credential.cert(options)
-          : admin.credential.applicationDefault(),
-        projectId: process.env.FIREBASE_PROJECT_ID,
-      });
+      if (options) {
+        admin.initializeApp({
+          credential: admin.credential.cert(options),
+          projectId: process.env.FIREBASE_PROJECT_ID || (options as any).project_id,
+        });
+      } else {
+        admin.initializeApp({
+          credential: admin.credential.applicationDefault(),
+          projectId: process.env.FIREBASE_PROJECT_ID,
+        });
+      }
 
       this.initialized = true;
       console.log('[Firebase] ✅ Initialized successfully');
     } catch (error) {
       console.error('[Firebase] ❌ Initialization failed:', error);
-      console.log('[Firebase] Push notifications will be unavailable');
-      console.log('[Firebase] Set up: https://firebase.google.com/docs/admin/setup');
       this.initialized = false;
     }
   }
 
-  /**
-   * Check if Firebase is properly initialized
-   */
   isInitialized(): boolean {
     return this.initialized && admin.apps.length > 0;
   }
 
-  /**
-   * Send push notification to a single device
-   * 
-   * @param deviceToken - Firebase registration token from mobile app
-   * @param title - Notification title (25 chars max for best display)
-   * @param body - Notification body (150 chars max)
-   * @param data - Additional data payload (custom data for app)
-   * @param options - Additional FCM options (TTL, priority, etc)
-   * 
-   * @returns Promise with message ID if sent, null if failed
-   */
   async sendToDevice(
     deviceToken: string,
     title: string,
     body: string,
     data?: Record<string, string>,
-    options?: {
-      ttl?: number; // Time to live in seconds (default: 86400 = 1 day)
-      priority?: 'high' | 'normal'; // high for time-sensitive, normal otherwise
-      clickAction?: string; // Action to perform when user taps notification
-    }
+    options?: { ttl?: number; priority?: 'high' | 'normal'; clickAction?: string }
   ): Promise<string | null> {
-    if (!this.isInitialized()) {
-      console.warn('[Firebase] Not initialized, cannot send push notification');
-      return null;
-    }
+    if (!this.isInitialized()) return null;
 
     try {
       const message: admin.messaging.Message = {
         token: deviceToken,
-        notification: {
-          title,
-          body,
-        },
+        notification: { title, body },
         data: data || {},
         android: {
           priority: options?.priority === 'high' ? 'high' : 'normal',
-          ttl: (options?.ttl || 86400) * 1000, // Convert to milliseconds
-          notification: {
-            clickAction: options?.clickAction,
-          },
+          ttl: (options?.ttl || 86400) * 1000,
+          notification: { clickAction: options?.clickAction },
         },
         apns: {
           headers: {
             'apns-priority': options?.priority === 'high' ? '10' : '5',
             'apns-ttl': String(options?.ttl || 86400),
           },
-          payload: {
-            aps: {
-              alert: {
-                title,
-                body,
-              },
-              sound: 'default',
-              badge: 1,
-            },
-          },
+          payload: { aps: { alert: { title, body }, sound: 'default', badge: 1 } },
         },
         webpush: {
-          headers: {
-            TTL: String(options?.ttl || 86400),
-          },
-          notification: {
-            title,
-            body,
-            icon: '/icon-192x192.png',
-            badge: '/badge-72x72.png',
-          },
+          headers: { TTL: String(options?.ttl || 86400) },
+          notification: { title, body, icon: '/icon-192x192.png', badge: '/badge-72x72.png' },
         },
       };
 
@@ -142,18 +109,7 @@ class FirebaseService {
       console.log(`[Firebase] ✅ Push sent to device: ${deviceToken.substring(0, 20)}...`);
       return messageId;
     } catch (error: any) {
-      // Handle specific Firebase errors
-      if (error.code === 'messaging/invalid-registration-token') {
-        console.warn(`[Firebase] Invalid token (device uninstalled?): ${deviceToken.substring(0, 20)}...`);
-        return null; // Token should be marked for deletion
-      } else if (error.code === 'messaging/mismatched-credential') {
-        console.error('[Firebase] Credentials don\'t match project ID');
-        return null;
-      } else if (error.code === 'messaging/message-rate-exceeded') {
-        console.warn('[Firebase] Rate limited - try again later');
-        return null;
-      }
-      console.error('[Firebase] Error sending push:', error.message);
+      console.error('[Firebase] Error sending push:', error.message || error);
       return null;
     }
   }
@@ -230,14 +186,12 @@ class FirebaseService {
 
       const response = await admin.messaging().sendEachForMulticast(message);
 
-
-
       const failedTokens: string[] = [];
-    response.responses.forEach((resp: admin.messaging.SendResponse, idx: number) => {
-      if (!resp.success) {
-        failedTokens.push(deviceTokens[idx]);
-      }
-    });
+      response.responses.forEach((resp: admin.messaging.SendResponse, idx: number) => {
+        if (!resp.success) {
+          failedTokens.push(deviceTokens[idx]);
+        }
+      });
 
       console.log(`[Firebase] ✅ Sent to ${response.successCount}/${deviceTokens.length} devices`);
       if (failedTokens.length > 0) {
@@ -444,7 +398,5 @@ class FirebaseService {
   }
 }
 
-// Export singleton instance
 export const firebaseService = new FirebaseService();
-
 export default firebaseService;
