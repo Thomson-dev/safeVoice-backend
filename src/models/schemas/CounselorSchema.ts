@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { Counselor as CounselorType } from '../../types';
 
-interface CounselorDocument extends CounselorType, Document {}
+interface CounselorDocument extends CounselorType, Document { }
 
 export const CounselorSchema = new Schema<CounselorDocument>(
   {
@@ -33,6 +33,10 @@ export const CounselorSchema = new Schema<CounselorDocument>(
       type: Boolean,
       default: false,
       index: true
+    },
+    phone: {
+      type: String,
+      required: true
     },
     schoolName: String,
     department: String,

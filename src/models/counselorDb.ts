@@ -20,6 +20,7 @@ export const counselorModel = {
     password: string;
     fullName: string;
     license: string;
+    phone: string;
     schoolName?: string;
     department?: string;
   }): Promise<CounselorType> => {
@@ -42,6 +43,7 @@ export const counselorModel = {
       password: hashedPassword,
       fullName: data.fullName,
       license: data.license,
+      phone: data.phone,
       schoolName: data.schoolName,
       department: data.department,
       role: 'counselor',
@@ -58,6 +60,7 @@ export const counselorModel = {
       license: counselor.license,
       role: counselor.role,
       isVerified: counselor.isVerified,
+      phone: counselor.phone,
       schoolName: counselor.schoolName,
       department: counselor.department,
       createdAt: counselor.createdAt,
@@ -78,6 +81,7 @@ export const counselorModel = {
       license: counselor.license,
       role: counselor.role,
       isVerified: counselor.isVerified,
+      phone: counselor.phone,
       schoolName: counselor.schoolName,
       department: counselor.department,
       createdAt: counselor.createdAt,
@@ -98,6 +102,7 @@ export const counselorModel = {
       license: counselor.license,
       role: counselor.role,
       isVerified: counselor.isVerified,
+      phone: counselor.phone,
       schoolName: counselor.schoolName,
       department: counselor.department,
       createdAt: counselor.createdAt,
@@ -124,6 +129,7 @@ export const counselorModel = {
       license: counselor.license,
       role: counselor.role,
       isVerified: counselor.isVerified,
+      phone: counselor.phone,
       schoolName: counselor.schoolName,
       department: counselor.department,
       createdAt: counselor.createdAt,
@@ -142,6 +148,7 @@ export const counselorModel = {
       license: c.license,
       role: c.role,
       isVerified: c.isVerified,
+      phone: c.phone,
       schoolName: c.schoolName,
       department: c.department,
       createdAt: c.createdAt,
@@ -167,6 +174,7 @@ export const counselorModel = {
       license: counselor.license,
       role: counselor.role,
       isVerified: counselor.isVerified,
+      phone: counselor.phone,
       schoolName: counselor.schoolName,
       department: counselor.department,
       createdAt: counselor.createdAt,
@@ -197,6 +205,20 @@ export const counselorModel = {
       fullName: c.fullName,
       email: c.email,
       name: c.fullName
+    }));
+  },
+
+  // Get counselors with phone numbers for emergency SMS
+  getCounselorsWithPhones: async (): Promise<Array<{ id: string; fullName: string; phone: string }>> => {
+    const counselors = await Counselor.find({
+      isVerified: true,
+      phone: { $exists: true, $nin: [null, ''] }
+    }).select('_id fullName phone');
+
+    return counselors.map(c => ({
+      id: c._id.toString(),
+      fullName: c.fullName,
+      phone: (c as any).phone
     }));
   }
 };

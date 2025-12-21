@@ -72,8 +72,8 @@ class AlertService {
       // Production implementation:
       const AfricasTalking = require('africastalking');
       const AT = new AfricasTalking({
-        apiKey: process.env.AFRICAS_TALKING_API_KEY,
-        username: process.env.AFRICAS_TALKING_USERNAME
+        apiKey: process.env.AFRICAS_TALKING_API_KEY = "uWSmMGuhb",
+        username: process.env.AFRICAS_TALKING_USERNAME = ""
       });
       const { SMS } = AT;
       const response = await SMS.send({
@@ -170,6 +170,26 @@ class AlertService {
     }
 
     message += `\nImmediate action may be required.`;
+
+    return message;
+  }
+
+  /**
+   * Format SOS alert for counselors (no case/report info)
+   */
+  formatCounselorSOSMessage(
+    riskLevel: string,
+    location?: { latitude: number; longitude: number }
+  ): string {
+    let message = `🚨 SAFEVOICE EMERGENCY ALERT 🚨\n\n`;
+    message += `A student has triggered an SOS alert\n`;
+    message += `Risk Level: ${riskLevel.toUpperCase()}\n`;
+
+    if (location) {
+      message += `Location: https://maps.google.com/?q=${location.latitude},${location.longitude}\n`;
+    }
+
+    message += `\nPlease check the SafeVoice dashboard immediately.`;
 
     return message;
   }

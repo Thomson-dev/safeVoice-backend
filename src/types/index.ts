@@ -108,6 +108,7 @@ export interface Counselor {
   license: string;
   role: 'counselor';
   isVerified: boolean;
+  phone: string;
   schoolName?: string;
   department?: string;
   createdAt: Date;

@@ -111,12 +111,12 @@ export const authController = {
   // Counselor registration
   registerCounselor: async (req: Request, res: Response) => {
     try {
-      const { email, password, fullName, license, schoolName, department, role } = req.body;
+      const { email, password, fullName, license, phone, schoolName, department, role } = req.body;
 
       // Validation
-      if (!email || !password || !fullName || !license) {
+      if (!email || !password || !fullName || !license || !phone) {
         return res.status(400).json({
-          error: 'email, password, fullName, and license are required'
+          error: 'email, password, fullName, license, and phone are required'
         });
       }
 
@@ -132,6 +132,7 @@ export const authController = {
         password,
         fullName,
         license,
+        phone,
         schoolName,
         department
       });

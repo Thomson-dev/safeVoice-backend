@@ -68,6 +68,24 @@ export const emergencyAlertController = {
         await emergencyAlertModel.updateAlertsSent(alert.id, 'sms', contactPhones);
       }
 
+      // 4. Notify counselors via SMS (without case/report info)
+      const { counselorModel } = await import('../models/counselorDb');
+      const counselorsWithPhones = await counselorModel.getCounselorsWithPhones();
+
+      if (counselorsWithPhones.length > 0) {
+        const counselorPhones = counselorsWithPhones.map(c => c.phone);
+        const counselorMessage = alertService.formatCounselorSOSMessage(
+          'critical',
+          location
+        );
+
+        const counselorSmsResult = await alertService.sendSMSAlert(counselorPhones, counselorMessage);
+
+        if (counselorSmsResult.success) {
+          console.log(`📞 Notified ${counselorsWithPhones.length} counselors via SMS`);
+        }
+      }
+
       return res.status(201).json({
         success: true,
         message: 'Emergency alert sent',
@@ -76,7 +94,8 @@ export const emergencyAlertController = {
           status: 'triggered',
           createdAt: alert.createdAt
         },
-        notifiedContacts: contactPhones.length
+        notifiedContacts: contactPhones.length,
+        notifiedCounselors: counselorsWithPhones.length
       });
     } catch (error) {
       console.error('SOS trigger error:', error);
