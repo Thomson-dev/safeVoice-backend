@@ -32,7 +32,7 @@ app.get('/api/health', (req: Request, res: Response) => {
 
 // Home route
 app.get('/', (req: Request, res: Response) => {
-  res.json({ 
+  res.json({
     message: 'SafeVoice Backend API',
     version: '1.0.0',
     endpoints: {
@@ -41,7 +41,8 @@ app.get('/', (req: Request, res: Response) => {
       student: '/api/student',
       cases: '/api/cases',
       counselor: '/api/counselor',
-      alerts: '/api/alerts',
+
+      emergency: '/api/emergency',
       devices: '/api/devices'
     }
   });
@@ -53,9 +54,8 @@ app.use('/api', publicRoutes);
 app.use('/api/student', studentRoutes);
 app.use('/api/counselor', counselorRoutes);
 app.use('/api/cases', caseRoutes);
-app.use('/api/alerts', emergencyAlertRoutes);
+app.use('/api/emergency', emergencyAlertRoutes);
 app.use('/api/devices', deviceTokenRoutes);
-app.use('/api/alerts', emergencyAlertRoutes);
 app.use('/api', resourceRoutes);
 
 // 404 handler
