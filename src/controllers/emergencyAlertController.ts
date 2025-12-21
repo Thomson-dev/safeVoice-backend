@@ -3,6 +3,7 @@ import { emergencyAlertModel } from '../models/emergencyAlertDb';
 import { caseModel } from '../models/caseDb';
 import { reportModel } from '../models/reportDb';
 import { studentModel } from '../models/studentDb';
+import { contactModel } from '../models/contactDb';
 import { alertService } from '../services/alertService';
 
 export const emergencyAlertController = {
@@ -12,111 +13,70 @@ export const emergencyAlertController = {
   triggerSOS: async (req: Request, res: Response) => {
     try {
       const studentId = req.user?.userId;
-      const { reportId, location } = req.body;
+      const { latitude, longitude, address } = req.body;
 
-      if (!studentId || !reportId) {
+      // Construct location object
+      const location = {
+        latitude: Number(latitude),
+        longitude: Number(longitude),
+        address
+      };
+
+      if (!studentId) {
+        return res.status(401).json({
+          error: 'Authentication required'
+        });
+      }
+
+      // 1. Get trusted contacts
+      const contacts = await contactModel.getByUserId(studentId);
+      const contactPhones = contacts.map(c => c.phone).filter(Boolean) as string[];
+
+      if (contactPhones.length === 0) {
         return res.status(400).json({
-          error: 'studentId and reportId are required'
+          error: 'No trusted contacts with phone numbers found'
         });
       }
 
-      // Verify student owns this report
-      const report = await reportModel.getById(reportId);
-      if (!report || report.userId !== studentId) {
-        return res.status(403).json({
-          error: 'Unauthorized - you do not own this report'
-        });
-      }
-
-      // Get the case
-      const caseDoc = await caseModel.getByReportId(reportId);
-      if (!caseDoc) {
-        return res.status(404).json({
-          error: 'Case not found for this report'
-        });
-      }
-
-      // Create emergency alert
+      // 2. Save SOS log
       const alert = await emergencyAlertModel.create(
-        caseDoc.id,
-        reportId,
+        undefined, // No case ID
+        undefined, // No report ID
         studentId,
-        caseDoc.counselorId,
+        undefined, // No counselor ID
         'sos_button',
         'critical',
         'Student triggered SOS button - requires immediate assistance',
         location
       );
 
-      // Update case status to escalated
-      await caseModel.updateStatus(caseDoc.id, 'escalated');
-
       // Get student details
       const student = await studentModel.getById(studentId);
       const studentName = student?.anonymousId || 'Student';
 
-      // Get counselor email if assigned
-      let counselorEmail = '';
-      if (caseDoc.counselorId) {
-        // In production, fetch counselor email from counselor model
-        // For now, use placeholder
-        counselorEmail = 'counselor@safevoice.local';
-      }
+      // 3. Notify contacts via SMS
+      const smsMessage = alertService.formatSOSMessage(
+        studentName,
+        undefined, // No case ID
+        'critical',
+        location
+      );
 
-      // Send alerts to counselor
-      if (caseDoc.counselorId) {
-        // Push notification
-        await alertService.sendPushNotification(
-          caseDoc.counselorId,
-          '🚨 STUDENT SOS ALERT',
-          `${studentName} has triggered an SOS button in case ${caseDoc.caseId}`,
-          {
-            caseId: caseDoc.id,
-            alertId: alert.id,
-            alertType: 'sos_button'
-          }
-        );
+      const smsResult = await alertService.sendSMSAlert(contactPhones, smsMessage);
 
-        // Mark notification sent
-        await emergencyAlertModel.updateAlertsSent(alert.id, 'push_notification', caseDoc.counselorId);
-      }
-
-      // Send email alert to counselor
-      if (counselorEmail) {
-        const emailHtml = alertService.formatAlertEmail(
-          'sos',
-          studentName,
-          caseDoc.caseId,
-          'Student triggered SOS button - requires immediate assistance',
-          'critical',
-          location
-        );
-
-        const emailSent = await alertService.sendEmailAlert(
-          [counselorEmail],
-          '🚨 SafeVoice SOS Alert - Immediate Action Required',
-          emailHtml
-        );
-
-        if (emailSent) {
-          await emergencyAlertModel.updateAlertsSent(alert.id, 'email', [counselorEmail]);
-        }
+      if (smsResult.success) {
+        await emergencyAlertModel.updateAlertsSent(alert.id, 'sms', contactPhones);
       }
 
       return res.status(201).json({
         success: true,
-        message: 'SOS alert triggered successfully',
+        message: 'Emergency alert sent',
         alert: {
           id: alert.id,
-          caseId: caseDoc.caseId,
           status: 'triggered',
-          alertsSent: {
-            push_notification: caseDoc.counselorId ? true : false,
-            sms: false,
-            email: counselorEmail ? true : false
-          },
           createdAt: alert.createdAt
-        }
+        },
+        notifiedContacts: contactPhones.length
       });
     } catch (error) {
       console.error('SOS trigger error:', error);
@@ -271,8 +231,18 @@ export const emergencyAlertController = {
       }
 
       // Verify access (student or assigned counselor)
-      const caseDoc = await caseModel.getById(alert.caseId);
-      if (!caseDoc || (caseDoc.studentId !== userId && caseDoc.counselorId !== userId)) {
+      let authorized = false;
+
+      if (alert.studentId === userId || (alert.counselorId && alert.counselorId === userId)) {
+        authorized = true;
+      } else if (alert.caseId) {
+        const caseDoc = await caseModel.getById(alert.caseId);
+        if (caseDoc && (caseDoc.studentId === userId || caseDoc.counselorId === userId)) {
+          authorized = true;
+        }
+      }
+
+      if (!authorized) {
         return res.status(403).json({
           error: 'Not authorized to view this alert'
         });

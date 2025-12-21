@@ -55,9 +55,7 @@ export interface TrustedContact {
   id: string;
   userId: string;
   name: string; // Can be anonymous (e.g., "Friend 1", "Counselor")
-  phone?: string;
-  email?: string;
-  relationship?: string; // friend, family, counselor, etc.
+  phone: string;
   createdAt: Date;
 }
 

@@ -6,7 +6,7 @@ export const contactController = {
   // Create trusted contact
   createContact: async (req: Request, res: Response) => {
     try {
-      const { name, phone, email, relationship } = req.body;
+      const { name, phone } = req.body;
       const userId = req.user?.userId;
 
       if (!userId) {
@@ -21,13 +21,7 @@ export const contactController = {
         });
       }
 
-      const contact = await contactModel.create(
-        userId,
-        name,
-        phone,
-        email,
-        relationship
-      );
+      const contact = await contactModel.create(userId, name, phone);
 
       return res.status(201).json({
         success: true,
@@ -71,7 +65,7 @@ export const contactController = {
     try {
       const { id } = req.params;
       const userId = req.user?.userId;
-      const { name, phone, email, relationship } = req.body;
+      const { name, phone } = req.body;
 
       if (!userId) {
         return res.status(401).json({
@@ -94,9 +88,7 @@ export const contactController = {
 
       const updated = await contactModel.update(id, {
         name: name || contact.name,
-        phone,
-        email,
-        relationship
+        phone: phone || contact.phone
       });
 
       return res.json({

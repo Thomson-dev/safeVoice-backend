@@ -70,22 +70,22 @@ class AlertService {
   ): Promise<{ success: boolean; messageIds?: string[] }> {
     try {
       // Production implementation:
-      // const AfricasTalking = require('africastalking');
-      // const AT = new AfricasTalking({
-      //   apiKey: process.env.AFRICAS_TALKING_API_KEY,
-      //   username: process.env.AFRICAS_TALKING_USERNAME
-      // });
-      // const { SMS } = AT;
-      // const response = await SMS.send({
-      //   to: phoneNumbers,
-      //   message: message
-      // });
-      // return { success: true, messageIds: response.data.SMSMessageData.Recipients.map(r => r.messageId) };
+      const AfricasTalking = require('africastalking');
+      const AT = new AfricasTalking({
+        apiKey: process.env.AFRICAS_TALKING_API_KEY,
+        username: process.env.AFRICAS_TALKING_USERNAME
+      });
+      const { SMS } = AT;
+      const response = await SMS.send({
+        to: phoneNumbers,
+        message: message
+      });
+      return { success: true, messageIds: (response.data.SMSMessageData.Recipients as { messageId: string }[]).map((r: { messageId: string }) => r.messageId) };
 
       // Development mock:
       console.log(`📞 SMS Alert would be sent to: ${phoneNumbers.join(', ')}`);
       console.log(`   Message: ${message}`);
-      
+
       return {
         success: true,
         messageIds: phoneNumbers.map((_, i) => `mock-msg-${Date.now()}-${i}`)
@@ -120,7 +120,7 @@ class AlertService {
       console.log(`📧 Email Alert would be sent to: ${emailAddresses.join(', ')}`);
       console.log(`   Subject: ${subject}`);
       console.log(`   Body: ${htmlBody.substring(0, 100)}...`);
-      
+
       return true;
     } catch (error) {
       console.error('Email send error:', error);
@@ -133,21 +133,21 @@ class AlertService {
    */
   formatSOSMessage(
     studentName: string,
-    caseId: string,
+    caseId: string | undefined, // Updated to be optional
     riskLevel: string,
     location?: { latitude: number; longitude: number }
   ): string {
     let message = `🚨 SAFEVOICE ALERT 🚨\n\n`;
     message += `Student: ${studentName}\n`;
-    message += `Case ID: ${caseId}\n`;
+    if (caseId) message += `Case ID: ${caseId}\n`;
     message += `Risk Level: ${riskLevel.toUpperCase()}\n`;
-    
+
     if (location) {
       message += `Location: https://maps.google.com/?q=${location.latitude},${location.longitude}\n`;
     }
-    
+
     message += `\nPlease respond immediately.`;
-    
+
     return message;
   }
 
@@ -164,13 +164,13 @@ class AlertService {
     message += `Student: ${studentName}\n`;
     message += `Case ID: ${caseId}\n`;
     message += `Reason: ${reason}\n`;
-    
+
     if (location) {
       message += `Location: https://maps.google.com/?q=${location.latitude},${location.longitude}\n`;
     }
-    
+
     message += `\nImmediate action may be required.`;
-    
+
     return message;
   }
 
@@ -187,7 +187,7 @@ class AlertService {
   ): string {
     const isUrgent = alertType === 'sos' || riskLevel === 'critical';
     const bgColor = isUrgent ? '#ff4444' : '#ff9900';
-    
+
     return `
       <!DOCTYPE html>
       <html>

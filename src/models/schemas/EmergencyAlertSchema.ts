@@ -5,13 +5,13 @@ export const EmergencyAlertSchema = new mongoose.Schema(
     caseId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Case',
-      required: true,
+      required: false,
       index: true
     },
     reportId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Report',
-      required: true,
+      required: false,
       index: true
     },
     studentId: {

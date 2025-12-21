@@ -5,8 +5,8 @@ const EmergencyAlert = mongoose.model('EmergencyAlert', EmergencyAlertSchema);
 
 export const emergencyAlertModel = {
   create: async (
-    caseId: string,
-    reportId: string,
+    caseId: string | undefined,
+    reportId: string | undefined,
     studentId: string,
     counselorId: string | undefined,
     triggerType: 'sos_button' | 'risk_escalation' | 'manual_escalation',
@@ -33,8 +33,8 @@ export const emergencyAlertModel = {
       await alert.save();
       return {
         id: alert._id.toString(),
-        caseId: alert.caseId.toString(),
-        reportId: alert.reportId.toString(),
+        caseId: alert.caseId?.toString(),
+        reportId: alert.reportId?.toString(),
         studentId: alert.studentId.toString(),
         triggerType: alert.triggerType,
         riskLevel: alert.riskLevel,
@@ -53,8 +53,8 @@ export const emergencyAlertModel = {
       if (!alert) return null;
       return {
         id: alert._id.toString(),
-        caseId: alert.caseId.toString(),
-        reportId: alert.reportId.toString(),
+        caseId: alert.caseId?.toString(),
+        reportId: alert.reportId?.toString(),
         studentId: alert.studentId.toString(),
         counselorId: alert.counselorId?.toString(),
         triggerType: alert.triggerType,

@@ -3,9 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 interface TrustedContactType {
   userId: string;
   name: string;
-  phone?: string;
-  email?: string;
-  relationship?: string;
+  phone: string;
 }
 
 interface TrustedContactDocument extends TrustedContactType, Document {
@@ -24,9 +22,10 @@ export const TrustedContactSchema = new Schema<TrustedContactDocument>(
       type: String,
       required: true
     },
-    phone: String,
-    email: String,
-    relationship: String
+    phone: {
+      type: String,
+      required: true
+    }
   },
   { timestamps: true }
 );

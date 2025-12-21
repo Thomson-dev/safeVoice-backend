@@ -4,14 +4,12 @@ import { TrustedContactSchema } from './schemas/TrustedContactSchema';
 const TrustedContact = mongoose.model('TrustedContact', TrustedContactSchema);
 
 export const contactModel = {
-  create: async (userId: string, name: string, phone?: string, email?: string, relationship?: string) => {
+  create: async (userId: string, name: string, phone: string) => {
     try {
       const contact = new TrustedContact({
         userId,
         name,
-        phone,
-        email,
-        relationship
+        phone
       });
       await contact.save();
       return {
@@ -19,8 +17,6 @@ export const contactModel = {
         userId: contact.userId.toString(),
         name: contact.name,
         phone: contact.phone,
-        email: contact.email,
-        relationship: contact.relationship,
         createdAt: (contact as any).createdAt
       };
     } catch (error) {
@@ -38,8 +34,6 @@ export const contactModel = {
         userId: contact.userId.toString(),
         name: contact.name,
         phone: contact.phone,
-        email: contact.email,
-        relationship: contact.relationship,
         createdAt: (contact as any).createdAt
       };
     } catch (error) {
@@ -56,8 +50,6 @@ export const contactModel = {
         userId: contact.userId.toString(),
         name: contact.name,
         phone: contact.phone,
-        email: contact.email,
-        relationship: contact.relationship,
         createdAt: contact.createdAt
       }));
     } catch (error) {
@@ -75,8 +67,6 @@ export const contactModel = {
         userId: contact.userId.toString(),
         name: contact.name,
         phone: contact.phone,
-        email: contact.email,
-        relationship: contact.relationship,
         createdAt: (contact as any).createdAt
       };
     } catch (error) {
