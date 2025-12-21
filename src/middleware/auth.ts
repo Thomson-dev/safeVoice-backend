@@ -31,7 +31,7 @@ export const auth = (req: Request, res: Response, next: NextFunction) => {
 
     // Verify JWT token
     const decoded = jwt.verify(token, JWT_SECRET) as any;
-    
+
     // Attach user info to request
     req.user = {
       userId: decoded.sub,
@@ -41,8 +41,11 @@ export const auth = (req: Request, res: Response, next: NextFunction) => {
 
     next();
   } catch (error) {
+
+    console.error('Auth Middleware Error:', error);
     return res.status(401).json({
-      error: 'Invalid or expired token'
+      error: 'Invalid or expired token',
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 };
@@ -60,7 +63,7 @@ export const studentAuth = (req: Request, res: Response, next: NextFunction) => 
 
     const token = authHeader.substring(7);
     const decoded = jwt.verify(token, JWT_SECRET) as any;
-    
+
     req.user = {
       userId: decoded.sub,
       anonymousId: decoded.anonymousId,
@@ -70,7 +73,8 @@ export const studentAuth = (req: Request, res: Response, next: NextFunction) => 
     next();
   } catch (error) {
     return res.status(401).json({
-      error: 'Invalid or expired token'
+      error: 'Invalid or expired token',
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 };
@@ -88,7 +92,7 @@ export const counselorAuth = (req: Request, res: Response, next: NextFunction) =
 
     const token = authHeader.substring(7);
     const decoded = jwt.verify(token, JWT_SECRET) as any;
-    
+
     if (decoded.role !== 'counselor') {
       return res.status(403).json({
         error: 'Only counselors can access this endpoint'
@@ -104,7 +108,8 @@ export const counselorAuth = (req: Request, res: Response, next: NextFunction) =
     next();
   } catch (error) {
     return res.status(401).json({
-      error: 'Invalid or expired token'
+      error: 'Invalid or expired token',
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 };

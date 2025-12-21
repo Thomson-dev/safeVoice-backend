@@ -1,5 +1,5 @@
 import express from 'express';
-import { studentAuth, counselorAuth, errorHandler } from '../middleware/auth';
+import { auth, errorHandler } from '../middleware/auth';
 import deviceTokenController from '../controllers/deviceTokenController';
 
 const router = express.Router();
@@ -15,19 +15,15 @@ const router = express.Router();
 
 // Public endpoints (for non-authenticated requests)
 router.post('/register', (req, res, next) => {
-  // Allow both student and counselor auth
-  studentAuth(req, res, () =>
-    counselorAuth(req, res, () =>
-      deviceTokenController.registerToken(req, res).catch(next)
-    )
+  // Allow any authenticated user (student or counselor)
+  auth(req, res, () =>
+    deviceTokenController.registerToken(req, res).catch(next)
   );
 });
 
 router.post('/unregister', (req, res, next) => {
-  studentAuth(req, res, () =>
-    counselorAuth(req, res, () =>
-      deviceTokenController.unregisterToken(req, res).catch(next)
-    )
+  auth(req, res, () =>
+    deviceTokenController.unregisterToken(req, res).catch(next)
   );
 });
 
@@ -35,44 +31,36 @@ router.post('/unregister', (req, res, next) => {
 router.get(
   '/my-devices',
   (req, res, next) => {
-    studentAuth(req, res, () =>
-      counselorAuth(req, res, () => {
-        deviceTokenController.getMyDevices(req, res).catch(next);
-      })
-    );
+    auth(req, res, () => {
+      deviceTokenController.getMyDevices(req, res).catch(next);
+    });
   }
 );
 
 router.post(
   '/heartbeat',
   (req, res, next) => {
-    studentAuth(req, res, () =>
-      counselorAuth(req, res, () => {
-        deviceTokenController.heartbeat(req, res).catch(next);
-      })
-    );
+    auth(req, res, () => {
+      deviceTokenController.heartbeat(req, res).catch(next);
+    });
   }
 );
 
 router.post(
   '/test-push',
   (req, res, next) => {
-    studentAuth(req, res, () =>
-      counselorAuth(req, res, () => {
-        deviceTokenController.sendTestPush(req, res).catch(next);
-      })
-    );
+    auth(req, res, () => {
+      deviceTokenController.sendTestPush(req, res).catch(next);
+    });
   }
 );
 
 router.delete(
   '/:deviceId',
   (req, res, next) => {
-    studentAuth(req, res, () =>
-      counselorAuth(req, res, () => {
-        deviceTokenController.removeDevice(req, res).catch(next);
-      })
-    );
+    auth(req, res, () => {
+      deviceTokenController.removeDevice(req, res).catch(next);
+    });
   }
 );
 

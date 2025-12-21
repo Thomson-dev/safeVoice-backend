@@ -27,8 +27,8 @@ class DeviceTokenController {
   async registerToken(req: Request, res: Response): Promise<void> {
     try {
       const { token, deviceType, deviceName, appVersion, osVersion } = req.body;
-      const userId = (req as any).user?.id;
-      const userType = (req as any).user?.userType;
+      const userId = (req as any).user?.userId;
+      const userType = (req as any).user?.role;
 
       // Validation
       if (!userId || !userType) {
@@ -88,8 +88,8 @@ class DeviceTokenController {
   async unregisterToken(req: Request, res: Response): Promise<void> {
     try {
       const { token } = req.body;
-      const userId = (req as any).user?.id;
-      const userType = (req as any).user?.userType;
+      const userId = (req as any).user?.userId;
+      const userType = (req as any).user?.role;
 
       if (!token) {
         res.status(400).json({ error: 'Missing token' });
@@ -130,7 +130,7 @@ class DeviceTokenController {
    */
   async getMyDevices(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).user?.userId;
 
       if (!userId) {
         res.status(401).json({ error: 'Unauthorized' });
@@ -191,7 +191,7 @@ class DeviceTokenController {
    */
   async sendTestPush(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).user?.userId;
       const providedToken = req.body?.token;
 
       if (!userId) {
@@ -260,7 +260,7 @@ class DeviceTokenController {
    */
   async removeDevice(req: Request, res: Response): Promise<void> {
     try {
-      const userId = (req as any).user?.id;
+      const userId = (req as any).user?.userId;
       const { deviceId } = req.params;
 
       if (!userId || !deviceId) {
