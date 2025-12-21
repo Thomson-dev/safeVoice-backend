@@ -81,7 +81,7 @@ export const counselorModel = {
       license: counselor.license,
       role: counselor.role,
       isVerified: counselor.isVerified,
-      phone: counselor.phone,
+      phone: counselor.phone || '',
       schoolName: counselor.schoolName,
       department: counselor.department,
       createdAt: counselor.createdAt,
@@ -102,7 +102,7 @@ export const counselorModel = {
       license: counselor.license,
       role: counselor.role,
       isVerified: counselor.isVerified,
-      phone: counselor.phone,
+      phone: counselor.phone || '',
       schoolName: counselor.schoolName,
       department: counselor.department,
       createdAt: counselor.createdAt,
@@ -118,8 +118,12 @@ export const counselorModel = {
     const isMatch = await verifyPassword(password, counselor.password);
     if (!isMatch) return null;
 
-    counselor.lastLogin = new Date();
-    await counselor.save();
+    // Use findOneAndUpdate to avoid validation errors if legacy documents
+    // are missing required fields (like phone)
+    await Counselor.findOneAndUpdate(
+      { _id: counselor._id },
+      { lastLogin: new Date() }
+    );
 
     return {
       id: counselor._id.toString(),
@@ -129,11 +133,11 @@ export const counselorModel = {
       license: counselor.license,
       role: counselor.role,
       isVerified: counselor.isVerified,
-      phone: counselor.phone,
+      phone: counselor.phone || '', // Fallback for legacy data
       schoolName: counselor.schoolName,
       department: counselor.department,
       createdAt: counselor.createdAt,
-      lastLogin: counselor.lastLogin
+      lastLogin: new Date()
     };
   },
 
@@ -148,7 +152,7 @@ export const counselorModel = {
       license: c.license,
       role: c.role,
       isVerified: c.isVerified,
-      phone: c.phone,
+      phone: c.phone || '',
       schoolName: c.schoolName,
       department: c.department,
       createdAt: c.createdAt,
@@ -174,7 +178,7 @@ export const counselorModel = {
       license: counselor.license,
       role: counselor.role,
       isVerified: counselor.isVerified,
-      phone: counselor.phone,
+      phone: counselor.phone || '',
       schoolName: counselor.schoolName,
       department: counselor.department,
       createdAt: counselor.createdAt,
