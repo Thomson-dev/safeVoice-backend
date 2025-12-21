@@ -86,6 +86,7 @@ export const reportController = {
       return res.json({
         success: true,
         report: {
+          id: report.id,
           trackingCode: report.trackingCode,
           anonymousId: report.anonymousId,
           incidentType: report.incidentType,
