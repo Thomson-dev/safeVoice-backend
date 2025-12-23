@@ -58,11 +58,8 @@ class AlertService {
   }
 
   /**
-   * Send SMS alert via Africa's Talking
-   * Requires: AFRICAS_TALKING_API_KEY, AFRICAS_TALKING_USERNAME
-   * 
-   * In production:
-   * npm install africastalking
+   * Send SMS alert via Twilio
+   * Requires: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER
    */
   async sendSMSAlert(
     phoneNumbers: string[],
@@ -70,29 +67,41 @@ class AlertService {
   ): Promise<{ success: boolean; messageIds?: string[] }> {
     try {
       // Production implementation:
-      const AfricasTalking = require('africastalking');
-      const AT = new AfricasTalking({
-        apiKey: process.env.AFRICAS_TALKING_API_KEY = "uWSmMGuhb",
-        username: process.env.AFRICAS_TALKING_USERNAME = ""
-      });
-      const { SMS } = AT;
-      const response = await SMS.send({
-        to: phoneNumbers,
-        message: message
-      });
-      return { success: true, messageIds: (response.data.SMSMessageData.Recipients as { messageId: string }[]).map((r: { messageId: string }) => r.messageId) };
+      const accountSid = process.env.TWILIO_ACCOUNT_SID;
+      const authToken = process.env.TWILIO_AUTH_TOKEN;
+      const fromNumber = process.env.TWILIO_PHONE_NUMBER
 
-      // Development mock:
-      console.log(`📞 SMS Alert would be sent to: ${phoneNumbers.join(', ')}`);
-      console.log(`   Message: ${message}`);
+      if (!accountSid || !authToken || !fromNumber) {
+        console.warn('⚠️ Twilio credentials missing. SMS would be sent to:', phoneNumbers);
+        return {
+          success: true,
+          messageIds: phoneNumbers.map((_, i) => `mock-msg-${Date.now()}-${i}`)
+        };
+      }
 
-      return {
-        success: true,
-        messageIds: phoneNumbers.map((_, i) => `mock-msg-${Date.now()}-${i}`)
-      };
+      const client = require('twilio')(accountSid, authToken);
+
+      const messagePromises = phoneNumbers.map(to =>
+        client.messages.create({
+          body: message,
+          from: fromNumber,
+          to: to
+        })
+      );
+
+      const responses = await Promise.all(messagePromises);
+      const messageIds = responses.map((r: any) => r.sid);
+
+      console.log(`✅ SMS sent successfully to ${phoneNumbers.length} recipients`);
+      return { success: true, messageIds };
+
     } catch (error) {
-      console.error('SMS send error:', error);
-      return { success: false };
+      console.error('Twilio SMS send error:', error);
+      // Fallback to mock for development/demo stability
+      return {
+        success: false,
+        messageIds: phoneNumbers.map((_, i) => `failed-msg-${Date.now()}-${i}`)
+      };
     }
   }
 
