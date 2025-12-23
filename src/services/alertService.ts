@@ -58,6 +58,28 @@ class AlertService {
   }
 
   /**
+   * Format phone number to E.164 format (Twilio requirement)
+   * Handles local Nigerian numbers (e.g., 080...) and international formats
+   */
+  private formatPhoneNumber(phone: string): string {
+    // 1. Remove all non-numeric characters except leading +
+    let cleaned = phone.replace(/[^\d+]/g, '');
+
+    // 2. if starts with +, return as is (assume already E.164)
+    if (cleaned.startsWith('+')) {
+      return cleaned;
+    }
+
+    // 3. if starts with 0, remove it and prepend +234
+    if (cleaned.startsWith('0')) {
+      cleaned = cleaned.substring(1);
+    }
+
+    // 4. prepend +234 (default to Nigeria if no country code)
+    return `+234${cleaned}`;
+  }
+
+  /**
    * Send SMS alert via Twilio
    * Requires: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER
    */
@@ -81,13 +103,14 @@ class AlertService {
 
       const client = require('twilio')(accountSid, authToken);
 
-      const messagePromises = phoneNumbers.map(to =>
-        client.messages.create({
+      const messagePromises = phoneNumbers.map(to => {
+        const formattedTo = this.formatPhoneNumber(to);
+        return client.messages.create({
           body: message,
           from: fromNumber,
-          to: to
-        })
-      );
+          to: formattedTo
+        });
+      });
 
       const responses = await Promise.all(messagePromises);
       const messageIds = responses.map((r: any) => r.sid);
